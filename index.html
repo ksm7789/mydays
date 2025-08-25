@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공유 캘린더</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', sans-serif;
+            background: #f5f5f7;
+            padding: 20px;
+        }
+        
+        .calendar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #e8f5e8 0%, #a5d6a7 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 200'%3E%3Ccircle cx='100' cy='60' r='16' fill='%2381c784' opacity='0.7'/%3E%3Ccircle cx='250' cy='80' r='20' fill='%2381c784' opacity='0.8'/%3E%3Ccircle cx='320' cy='50' r='12' fill='%2381c784' opacity='0.6'/%3E%3Cpath d='M 80 130 L 100 110 L 120 130 L 100 150 Z' fill='%234caf50' opacity='0.6'/%3E%3Cpath d='M 280 120 L 300 100 L 320 120 L 300 140 Z' fill='%234caf50' opacity='0.7'/%3E%3C/svg%3E");
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        .header > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+            color: white;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+        }
+        
+        .header .current-date {
+            font-size: 1.1rem;
+            opacity: 1;
+            font-weight: 600;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+            color: white;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
+        }
+        
+        .nav-buttons {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 2;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.7);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .weekday {
+            padding: 20px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #495057;
+            border-right: 1px solid #e9ecef;
+        }
+        
+        .weekday:last-child {
+            border-right: none;
+        }
+        
+        .weekday.sunday {
+            color: #dc3545;
+        }
+        
+        .weekday.saturday {
+            color: #007bff;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+        }
+        
+        .calendar-day {
+            min-height: 120px;
+            border-right: 1px solid #e9ecef;
+            border-bottom: 1px solid #e9ecef;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background: white;
+        }
+        
+        .calendar-day:nth-child(7n) {
+            border-right: none;
+        }
+        
+        .calendar-day:hover {
+            background: #f8f9fa;
+            transform: scale(1.02);
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .day-number {
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .other-month {
+            color: #adb5bd;
+            background: #f8f9fa;
+        }
+        
+        .today {
+            background: rgba(76, 175, 80, 0.3);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
+            border: 2px solid rgba(76, 175, 80, 0.6);
+        }
+        
+        .today:hover {
+            background: rgba(76, 175, 80, 0.4);
+            border-color: rgba(76, 175, 80, 0.8);
+        }
+        
+        .sunday .day-number {
+            color: #dc3545;
+        }
+        
+        .saturday .day-number {
+            color: #007bff;
+        }
+        
+        .today .day-number {
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .events {
+            margin-top: 8px;
+        }
+        
+        .event {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-bottom: 2px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+        
+        .event:hover {
+            background: #bbdefb;
+            transform: scale(1.05);
+        }
+        
+        .holiday-event {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .close:hover {
+            color: #333;
+            background: #f0f0f0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            min-width: 80px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8, #6a42a0);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+        
+        .existing-events {
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .existing-event {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .existing-event span {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            flex: 1;
+            margin-right: 10px;
+        }
+        
+        .existing-event.holiday {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+        
+        .event-delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+        
+        .event-delete-btn:hover {
+            background: #c82333;
+        }
+
+        .local-notice {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            z-index: 3;
+            background: rgba(33, 150, 243, 0.8);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <div class="header">
+            <div class="local-notice">💻 나만의 달력</div>
+            <h1 id="monthYear">공유 캘린더</h1>
+            <div class="current-date">오늘: <span id="current-date-text"></span></div>
+            <div class="current-time" style="font-size: 1rem; margin-top: 8px; font-weight: 500; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); color: white; filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));">
+                현재 시간: <span id="current-time"></span>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="changeMonth(-1)" id="prevBtn">◀ 이전</button>
+                <button class="nav-btn" onclick="goToToday()" id="todayBtn">오늘</button>
+                <button class="nav-btn" onclick="changeMonth(1)" id="nextBtn">다음 ▶</button>
+            </div>
+        </div>
+        
+        <div class="weekdays">
+            <div class="weekday sunday">일</div>
+            <div class="weekday">월</div>
+            <div class="weekday">화</div>
+            <div class="weekday">수</div>
+            <div class="weekday">목</div>
+            <div class="weekday">금</div>
+            <div class="weekday saturday">토</div>
+        </div>
+        
+        <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">일정 관리</h2>
+                <button class="close" onclick="closeModal()">&times;</button>
+            </div>
+            
+            <div class="existing-events" id="existingEvents"></div>
+            
+            <div class="form-group">
+                <label class="form-label">일정 입력</label>
+                <textarea id="eventInput" class="form-input form-textarea" placeholder="일정 내용을 입력하세요" rows="3"></textarea>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="saveEvent()">저장</button>
+                <button class="btn btn-secondary" onclick="closeModal()">닫기</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 전역 변수
+        let currentDate = new Date();
+        let displayDate = new Date();
+        let selectedDate = null;
+        let events = {};
+        
+        const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+        const weekdayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+        const monthColors = [
+            'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+            'linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%)',
+            'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+            'linear-gradient(135deg, #fff3e0 0%, #ffe0b3 100%)',
+            'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
+            'linear-gradient(135deg, #e3f2fd 0%, #90caf9 100%)',
+            'linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%)',
+            'linear-gradient(135deg, #e8f5e8 0%, #a5d6a7 100%)',
+            'linear-gradient(135deg, #fff3e0 0%, #ffcc80 100%)',
+            'linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%)',
+            'linear-gradient(135deg, #efebe9 0%, #d7ccc8 100%)',
+            'linear-gradient(135deg, #e8f4f8 0%, #b3d9ff 100%)'
+        ];
+        
+        // 2025년 공휴일 데이터
+        const holidays2025 = {
+            '0-1': '신정',
+            '0-28': '설날 연휴',
+            '0-29': '설날',
+            '0-30': '설날 연휴',
+            '2-1': '삼일절',
+            '4-5': '어린이날·부처님오신날',
+            '4-6': '어린이날 대체공휴일',
+            '5-6': '현충일',
+            '7-15': '광복절',
+            '9-3': '개천절',
+            '9-6': '추석연휴',
+            '9-7': '추석',
+            '9-8': '추석연휴',
+            '9-9': '한글날',
+            '11-25': '성탄절'
+        };
+
+        // 로컬 스토리지에서 이벤트 로드
+        function loadEventsFromStorage() {
+            try {
+                const storedEvents = localStorage.getItem('calendarEvents');
+                if (storedEvents) {
+                    events = JSON.parse(storedEvents);
+                    console.log("로컬 저장소에서 일정 로드 완료");
+                }
+            } catch (error) {
+                console.error("로컬 저장소 로드 실패:", error);
+                events = {};
+            }
+        }
+
+        // 로컬 스토리지에 이벤트 저장
+        function saveEventsToStorage() {
+            try {
+                localStorage.setItem('calendarEvents', JSON.stringify(events));
+                console.log("로컬 저장소에 일정 저장 완료");
+            } catch (error) {
+                console.error("로컬 저장소 저장 실패:", error);
+                alert('저장 공간이 부족합니다. 일부 일정을 삭제해주세요.');
+            }
+        }
+
+        // 시간 및 날짜 업데이트
+        function updateTime() {
+            const now = new Date();
+            const dateElement = document.getElementById('current-date-text');
+            const timeElement = document.getElementById('current-time');
+            if (dateElement) {
+                const year = now.getFullYear();
+                const month = now.getMonth() + 1;
+                const date = now.getDate();
+                const day = weekdayNames[now.getDay()];
+                dateElement.textContent = `${year}년 ${month}월 ${date}일 ${day}`;
+            }
+            if (timeElement) {
+                let hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const ampm = hours >= 12 ? '오후' : '오전';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                timeElement.textContent = `${ampm} ${hours}시 ${minutes}분 ${seconds}초`;
+            }
+        }
+
+        // 날짜 키 생성
+        function getDateKey(date) {
+            return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+        }
+
+        // 공휴일 확인
+        function getHoliday(date) {
+            const key = `${date.getMonth()}-${date.getDate()}`;
+            return holidays2025[key] || null;
+        }
+
+        // 버튼 텍스트 업데이트
+        function updateNavButtons() {
+            const prevMonth = new Date(displayDate);
+            prevMonth.setMonth(displayDate.getMonth() - 1);
+            const nextMonth = new Date(displayDate);
+            nextMonth.setMonth(displayDate.getMonth() + 1);
+            
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            if (prevBtn && nextBtn) {
+                prevBtn.innerHTML = `◀ ${monthNames[prevMonth.getMonth()]}`;
+                nextBtn.innerHTML = `${monthNames[nextMonth.getMonth()]} ▶`;
+            }
+        }
+
+        // 달력 생성
+        function generateCalendar() {
+            const year = displayDate.getFullYear();
+            const month = displayDate.getMonth();
+            
+            // 헤더 업데이트
+            const monthYearEl = document.getElementById('monthYear');
+            if (monthYearEl) {
+                monthYearEl.textContent = `${year}년 ${monthNames[month]}`;
+            }
+            
+            const header = document.querySelector('.header');
+            if (header) {
+                header.style.background = monthColors[month];
+            }
+            
+            // 네비게이션 버튼 텍스트 업데이트
+            updateNavButtons();
+            
+            // 달력 그리드 생성
+            const grid = document.getElementById('calendar-grid');
+            if (!grid) return;
+            
+            grid.innerHTML = '';
+            
+            const firstDay = new Date(year, month, 1);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                
+                // 요일별 클래스
+                if (date.getDay() === 0) dayDiv.classList.add('sunday');
+                if (date.getDay() === 6) dayDiv.classList.add('saturday');
+                
+                // 다른 달
+                if (date.getMonth() !== month) {
+                    dayDiv.classList.add('other-month');
+                }
+                
+                // 오늘
+                const today = new Date();
+                if (date.getFullYear() === today.getFullYear() &&
+                    date.getMonth() === today.getMonth() &&
+                    date.getDate() === today.getDate()) {
+                    dayDiv.classList.add('today');
+                }
+                
+                // 날짜 번호와 이벤트 HTML 생성
+                let eventsHTML = '';
+                const dateKey = getDateKey(date);
+                
+                // 공휴일 이벤트
+                const holiday = getHoliday(date);
+                if (holiday) {
+                    eventsHTML += `<div class="event holiday-event">${holiday}</div>`;
+                }
+                
+                // 사용자 일정
+                if (events[dateKey]) {
+                    events[dateKey].forEach(event => {
+                        const eventText = typeof event === 'string' ? event : event.text;
+                        eventsHTML += `<div class="event">${eventText}</div>`;
+                    });
+                }
+                
+                dayDiv.innerHTML = `
+                    <div class="day-number">${date.getDate()}</div>
+                    <div class="events">${eventsHTML}</div>
+                `;
+                
+                // 공휴일 숫자 색상 변경
+                if (holiday) {
+                    const dayNumber = dayDiv.querySelector('.day-number');
+                    if (dayNumber) {
+                        dayNumber.style.color = '#dc3545';
+                        dayNumber.style.fontWeight = 'bold';
+                    }
+                }
+                
+                // 클릭 이벤트
+                dayDiv.addEventListener('click', () => openModal(date));
+                
+                grid.appendChild(dayDiv);
+            }
+        }
+
+        // 월 변경
+        window.changeMonth = function(direction) {
+            displayDate.setMonth(displayDate.getMonth() + direction);
+            generateCalendar();
+        }
+
+        // 오늘로 이동
+        window.goToToday = function() {
+            displayDate = new Date();
+            generateCalendar();
+        }
+
+        // 모달 열기
+        window.openModal = function(date) {
+            selectedDate = new Date(date);
+            const modalTitle = document.getElementById('modalTitle');
+            if (modalTitle) {
+                modalTitle.textContent = `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일 일정`;
+            }
+            
+            showExistingEvents();
+            
+            const eventInput = document.getElementById('eventInput');
+            if (eventInput) {
+                eventInput.value = '';
+            }
+            
+            const modal = document.getElementById('eventModal');
+            if (modal) {
+                modal.style.display = 'block';
+                setTimeout(() => {
+                    if (eventInput) eventInput.focus();
+                }, 100);
+            }
+        }
+
+        // 모달 닫기
+        window.closeModal = function() {
+            const modal = document.getElementById('eventModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            selectedDate = null;
+        }
+
+        // 기존 일정 표시
+        window.showExistingEvents = function() {
+            const container = document.getElementById('existingEvents');
+            if (!container || !selectedDate) return;
+            
+            const dateKey = getDateKey(selectedDate);
+            let html = '';
+            
+            // 공휴일
+            const holiday = getHoliday(selectedDate);
+            if (holiday) {
+                html += `
+                    <div class="existing-event holiday">
+                        <span>${holiday}</span>
+                        <small style="color: #999; font-size: 0.8em;">공휴일</small>
+                    </div>
+                `;
+            }
+            
+            // 사용자 일정
+            if (events[dateKey] && events[dateKey].length > 0) {
+                events[dateKey].forEach((event, index) => {
+                    const eventText = typeof event === 'string' ? event : event.text;
+                    html += `
+                        <div class="existing-event">
+                            <span>${eventText}</span>
+                            <button class="event-delete-btn" onclick="deleteEvent('${dateKey}', ${index})">삭제</button>
+                        </div>
+                    `;
+                });
+            }
+            
+            if (html) {
+                container.innerHTML = '<h4 style="margin-bottom: 15px; color: #555;">기존 일정</h4>' + html;
+            } else {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">등록된 일정이 없습니다.</p>';
+            }
+        }
+
+        // 일정 저장
+        window.saveEvent = function() {
+            const input = document.getElementById('eventInput');
+            if (!input || !selectedDate) return;
+            
+            const text = input.value.trim();
+            if (!text) {
+                alert('일정을 입력해주세요.');
+                input.focus();
+                return;
+            }
+            
+            const dateKey = getDateKey(selectedDate);
+            
+            if (!events[dateKey]) {
+                events[dateKey] = [];
+            }
+            
+            events[dateKey].push(text);
+            
+            // 로컬 스토리지에 저장
+            saveEventsToStorage();
+
+            input.value = '';
+            generateCalendar();
+            showExistingEvents();
+        }
+
+        // 개별 일정 삭제
+        window.deleteEvent = function(dateKey, index) {
+            if (!selectedDate || !events[dateKey] || index < 0 || index >= events[dateKey].length) return;
+            
+            events[dateKey].splice(index, 1);
+            
+            if (events[dateKey].length === 0) {
+                delete events[dateKey];
+            }
+            
+            // 로컬 스토리지에 저장
+            saveEventsToStorage();
+            
+            generateCalendar();
+            showExistingEvents();
+        }
+        
+        // 이벤트 리스너 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            // 로컬 저장소에서 데이터 로드
+            loadEventsFromStorage();
+            
+            const modal = document.getElementById('eventModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+            }
+            
+            const eventInput = document.getElementById('eventInput');
+            if (eventInput) {
+                eventInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        saveEvent();
+                    }
+                });
+            }
+            
+            // 시간 업데이트
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // 달력 초기 생성
+            generateCalendar();
+        });
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+    </script>
+</body>
+</html>
