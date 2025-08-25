@@ -247,12 +247,16 @@
             background: rgba(64, 224, 208, 0.5);
         }
         
-        .sunday .day-number {
-            color: #dc3545;
+        .other-month .day-number {
+            color: #adb5bd !important;
         }
         
-        .saturday .day-number {
-            color: #007bff;
+        .other-month.sunday .day-number {
+            color: rgba(220, 53, 69, 0.5) !important;
+        }
+        
+        .other-month.saturday .day-number {
+            color: rgba(0, 123, 255, 0.5) !important;
         }
         
         .today .day-number {
@@ -285,6 +289,11 @@
         .holiday-event {
             background: #ffebee;
             color: #c62828;
+        }
+        
+        .other-month .holiday-event {
+            background: rgba(255, 235, 238, 0.5);
+            color: rgba(198, 40, 40, 0.6);
         }
         
         .storage-status {
