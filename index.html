@@ -63,6 +63,33 @@
             text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
             color: white;
             filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+            text-align: center;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px 15px;
+                min-height: 150px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+                margin-bottom: 8px;
+                text-align: center;
+                width: 100%;
+            }
+            
+            .header .current-date {
+                font-size: 1rem;
+                text-align: center;
+            }
+            
+            .header .current-time {
+                font-size: 0.9rem !important;
+                margin-top: 5px !important;
+                text-align: center;
+            }
         }
         
         .header .current-date {
@@ -76,10 +103,10 @@
         
         .nav-buttons {
             position: absolute;
-            top: 30px;
-            right: 30px;
+            top: 15px;
+            right: 15px;
             display: flex;
-            gap: 10px;
+            gap: 5px;
             z-index: 2;
         }
         
@@ -87,13 +114,29 @@
             background: rgba(255, 255, 255, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.5);
             color: white;
-            padding: 10px 18px;
-            border-radius: 25px;
+            padding: 8px 12px;
+            border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
             backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-buttons {
+                top: 8px;
+                right: 8px;
+                gap: 2px;
+            }
+            
+            .nav-btn {
+                padding: 4px 8px;
+                font-size: 0.7rem;
+                border-radius: 12px;
+                border: 1px solid rgba(255, 255, 255, 0.5);
+            }
         }
         
         .nav-btn:hover {
@@ -111,12 +154,13 @@
         }
         
         .weekday {
-            padding: 20px;
+            padding: 15px 5px;
             text-align: center;
             font-weight: 600;
             font-size: 0.9rem;
             color: #495057;
             border-right: 1px solid #e9ecef;
+            box-sizing: border-box;
         }
         
         .weekday:last-child {
@@ -140,11 +184,35 @@
             min-height: 120px;
             border-right: 1px solid #e9ecef;
             border-bottom: 1px solid #e9ecef;
-            padding: 15px;
+            padding: 10px 5px;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
             background: white;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 768px) {
+            .weekday {
+                padding: 12px 3px;
+                font-size: 0.8rem;
+            }
+            
+            .calendar-day {
+                min-height: 80px;
+                padding: 8px 3px;
+            }
+            
+            .day-number {
+                font-size: 1rem;
+                margin-bottom: 5px;
+            }
+            
+            .event {
+                font-size: 0.65rem;
+                padding: 1px 4px;
+                margin-bottom: 1px;
+            }
         }
         
         .calendar-day:nth-child(7n) {
@@ -170,15 +238,13 @@
         }
         
         .today {
-            background: rgba(76, 175, 80, 0.3);
-            color: #333;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
-            border: 2px solid rgba(76, 175, 80, 0.6);
+            background: rgba(64, 224, 208, 0.4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(64, 224, 208, 0.2);
         }
         
         .today:hover {
-            background: rgba(76, 175, 80, 0.4);
-            border-color: rgba(76, 175, 80, 0.8);
+            background: rgba(64, 224, 208, 0.5);
         }
         
         .sunday .day-number {
@@ -190,8 +256,7 @@
         }
         
         .today .day-number {
-            color: #333;
-            font-weight: bold;
+            color: white;
         }
         
         .events {
@@ -222,6 +287,20 @@
             color: #c62828;
         }
         
+        .storage-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            z-index: 3;
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+        }
+        
+        /* 모달 스타일 */
         .modal {
             display: none;
             position: fixed;
@@ -405,34 +484,23 @@
         .event-delete-btn:hover {
             background: #c82333;
         }
-
-        .local-notice {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            z-index: 3;
-            background: rgba(33, 150, 243, 0.8);
-            color: white;
-        }
     </style>
 </head>
 <body>
     <div class="calendar-container">
         <div class="header">
-            <div class="local-notice">💻 나만의 달력</div>
+            <div class="storage-status">📅 나만의 달력</div>
             <h1 id="monthYear">공유 캘린더</h1>
             <div class="current-date">오늘: <span id="current-date-text"></span></div>
             <div class="current-time" style="font-size: 1rem; margin-top: 8px; font-weight: 500; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); color: white; filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));">
                 현재 시간: <span id="current-time"></span>
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn" onclick="changeMonth(-1)" id="prevBtn">◀ 이전</button>
-                <button class="nav-btn" onclick="goToToday()" id="todayBtn">오늘</button>
-                <button class="nav-btn" onclick="changeMonth(1)" id="nextBtn">다음 ▶</button>
+                <div class="desktop-nav">
+                    <button class="nav-btn" onclick="changeMonth(-1)" id="prevBtn">◀ 이전</button>
+                    <button class="nav-btn today-btn" onclick="goToToday()">오늘</button>
+                    <button class="nav-btn" onclick="changeMonth(1)" id="nextBtn">다음 ▶</button>
+                </div>
             </div>
         </div>
         
@@ -513,28 +581,27 @@
             '11-25': '성탄절'
         };
 
-        // 로컬 스토리지에서 이벤트 로드
-        function loadEventsFromStorage() {
+        // 로컬 스토리지에서 데이터 로드
+        function loadEvents() {
             try {
-                const storedEvents = localStorage.getItem('calendarEvents');
-                if (storedEvents) {
-                    events = JSON.parse(storedEvents);
-                    console.log("로컬 저장소에서 일정 로드 완료");
+                const saved = localStorage.getItem('calendar-events');
+                if (saved) {
+                    events = JSON.parse(saved);
+                    console.log('로컬 스토리지에서 일정 로드 완료');
                 }
             } catch (error) {
-                console.error("로컬 저장소 로드 실패:", error);
+                console.error('로컬 스토리지 데이터 로드 실패:', error);
                 events = {};
             }
         }
 
-        // 로컬 스토리지에 이벤트 저장
-        function saveEventsToStorage() {
+        // 로컬 스토리지에 데이터 저장
+        function saveEvents() {
             try {
-                localStorage.setItem('calendarEvents', JSON.stringify(events));
-                console.log("로컬 저장소에 일정 저장 완료");
+                localStorage.setItem('calendar-events', JSON.stringify(events));
+                console.log('로컬 스토리지에 일정 저장 완료');
             } catch (error) {
-                console.error("로컬 저장소 저장 실패:", error);
-                alert('저장 공간이 부족합니다. 일부 일정을 삭제해주세요.');
+                console.error('로컬 스토리지 저장 실패:', error);
             }
         }
 
@@ -543,6 +610,7 @@
             const now = new Date();
             const dateElement = document.getElementById('current-date-text');
             const timeElement = document.getElementById('current-time');
+            
             if (dateElement) {
                 const year = now.getFullYear();
                 const month = now.getMonth() + 1;
@@ -550,6 +618,7 @@
                 const day = weekdayNames[now.getDay()];
                 dateElement.textContent = `${year}년 ${month}월 ${date}일 ${day}`;
             }
+            
             if (timeElement) {
                 let hours = now.getHours();
                 const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -583,8 +652,122 @@
             const nextBtn = document.getElementById('nextBtn');
             
             if (prevBtn && nextBtn) {
-                prevBtn.innerHTML = `◀ ${monthNames[prevMonth.getMonth()]}`;
-                nextBtn.innerHTML = `${monthNames[nextMonth.getMonth()]} ▶`;
+                if (window.innerWidth <= 768) {
+                    prevBtn.innerHTML = `◀`;
+                    nextBtn.innerHTML = `▶`;
+                } else {
+                    prevBtn.innerHTML = `◀ ${monthNames[prevMonth.getMonth()]}`;
+                    nextBtn.innerHTML = `${monthNames[nextMonth.getMonth()]} ▶`;
+                }
+            }
+        }
+
+        // 오늘로 이동
+        window.goToToday = function() {
+            const today = new Date();
+            displayDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            generateCalendar();
+        }
+
+        // 스와이프 기능 변수
+        let startX = 0;
+        let startY = 0;
+        let isDragging = false;
+        let currentTranslateX = 0;
+
+        // 터치 시작
+        function handleTouchStart(e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isDragging = true;
+        }
+
+        // 터치 이동
+        function handleTouchMove(e) {
+            if (!isDragging) return;
+            
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            const deltaX = currentX - startX;
+            const deltaY = currentY - startY;
+            
+            if (Math.abs(deltaY) > Math.abs(deltaX)) {
+                isDragging = false;
+                return;
+            }
+            
+            e.preventDefault();
+            currentTranslateX = deltaX;
+            
+            const grid = document.getElementById('calendar-grid');
+            if (grid && Math.abs(deltaX) > 50) {
+                grid.style.transform = `translateX(${deltaX * 0.3}px)`;
+                grid.style.opacity = Math.max(0.5, 1 - Math.abs(deltaX) / 300);
+            }
+        }
+
+        // 터치 끝
+        function handleTouchEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const grid = document.getElementById('calendar-grid');
+            if (grid) {
+                grid.style.transform = '';
+                grid.style.opacity = '';
+            }
+            
+            if (Math.abs(currentTranslateX) > 80) {
+                if (currentTranslateX > 0) {
+                    changeMonth(-1);
+                } else {
+                    changeMonth(1);
+                }
+            }
+            
+            currentTranslateX = 0;
+        }
+
+        // 마우스 이벤트 (데스크톱)
+        let isMouseDragging = false;
+        let mouseStartX = 0;
+
+        function handleMouseDown(e) {
+            mouseStartX = e.clientX;
+            isMouseDragging = true;
+            e.preventDefault();
+        }
+
+        function handleMouseMove(e) {
+            if (!isMouseDragging) return;
+            
+            const deltaX = e.clientX - mouseStartX;
+            const grid = document.getElementById('calendar-grid');
+            
+            if (grid && Math.abs(deltaX) > 20) {
+                grid.style.transform = `translateX(${deltaX * 0.2}px)`;
+                grid.style.opacity = Math.max(0.7, 1 - Math.abs(deltaX) / 400);
+            }
+        }
+
+        function handleMouseUp(e) {
+            if (!isMouseDragging) return;
+            isMouseDragging = false;
+            
+            const deltaX = e.clientX - mouseStartX;
+            const grid = document.getElementById('calendar-grid');
+            
+            if (grid) {
+                grid.style.transform = '';
+                grid.style.opacity = '';
+            }
+            
+            if (Math.abs(deltaX) > 100) {
+                if (deltaX > 0) {
+                    changeMonth(-1);
+                } else {
+                    changeMonth(1);
+                }
             }
         }
 
@@ -604,7 +787,6 @@
                 header.style.background = monthColors[month];
             }
             
-            // 네비게이션 버튼 텍스트 업데이트
             updateNavButtons();
             
             // 달력 그리드 생성
@@ -683,12 +865,6 @@
         // 월 변경
         window.changeMonth = function(direction) {
             displayDate.setMonth(displayDate.getMonth() + direction);
-            generateCalendar();
-        }
-
-        // 오늘로 이동
-        window.goToToday = function() {
-            displayDate = new Date();
             generateCalendar();
         }
 
@@ -785,8 +961,8 @@
             events[dateKey].push(text);
             
             // 로컬 스토리지에 저장
-            saveEventsToStorage();
-
+            saveEvents();
+            
             input.value = '';
             generateCalendar();
             showExistingEvents();
@@ -803,7 +979,7 @@
             }
             
             // 로컬 스토리지에 저장
-            saveEventsToStorage();
+            saveEvents();
             
             generateCalendar();
             showExistingEvents();
@@ -811,8 +987,8 @@
         
         // 이벤트 리스너 설정
         document.addEventListener('DOMContentLoaded', function() {
-            // 로컬 저장소에서 데이터 로드
-            loadEventsFromStorage();
+            // 로컬 스토리지에서 데이터 로드
+            loadEvents();
             
             const modal = document.getElementById('eventModal');
             if (modal) {
@@ -838,13 +1014,39 @@
             
             // 달력 초기 생성
             generateCalendar();
-        });
-
-        // ESC 키로 모달 닫기
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
+            
+            // 터치 이벤트 리스너 (모바일에서만 활성화)
+            const calendarContainer = document.querySelector('.calendar-container');
+            if (calendarContainer && window.innerWidth <= 768) {
+                calendarContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+                calendarContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+                calendarContainer.addEventListener('touchend', handleTouchEnd, { passive: true });
+            } else if (calendarContainer) {
+                // 마우스 이벤트 (데스크톱 - 선택사항)
+                calendarContainer.addEventListener('mousedown', handleMouseDown);
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', handleMouseUp);
             }
+            
+            // 키보드 단축키
+            document.addEventListener('keydown', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                
+                switch(e.key) {
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        changeMonth(-1);
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        changeMonth(1);
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        goToToday();
+                        break;
+                }
+            });
         });
 
     </script>
