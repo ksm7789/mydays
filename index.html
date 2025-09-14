@@ -1057,5 +1057,17 @@
         });
 
     </script>
+<!-- head 안 -->
+<link rel="manifest" href="/mydays/manifest.webmanifest">
+<meta name="theme-color" content="#16a34a">
+
+<!-- body 끝나기 직전 -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/mydays/sw.js');
+  });
+}
+</script>
 </body>
 </html>
